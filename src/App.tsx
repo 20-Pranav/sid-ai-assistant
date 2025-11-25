@@ -12,6 +12,33 @@ function App() {
   const [inputMessage, setInputMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // Mock AI responses that work without backend
+  const getAIResponse = (userMessage: string): string => {
+    const lowerMessage = userMessage.toLowerCase()
+    
+    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hola')) {
+      return "¡Hola! I'm SID AI Assistant. Nice to meet you! 😊"
+    } else if (lowerMessage.includes('how are you')) {
+      return "I'm doing great! Thanks for asking. I'm here to help you with anything you need!"
+    } else if (lowerMessage.includes('what can you do')) {
+      return "I can chat with you, answer questions, help with ideas, and have conversations on any topic! What would you like to talk about?"
+    } else if (lowerMessage.includes('thank')) {
+      return "You're welcome! I'm happy to help. Is there anything else you'd like to know?"
+    } else if (lowerMessage.includes('name')) {
+      return "I'm SID (Smart Intelligent Assistant), your AI companion! 🤖"
+    } else {
+      const responses = [
+        "That's interesting! Tell me more about that.",
+        "I'd love to help you with that! Could you give me more details?",
+        "Great question! From my knowledge, this is a fascinating topic worth exploring further.",
+        "I understand what you're asking. Let me share some insights about that.",
+        "Thanks for sharing! I have some thoughts on that topic.",
+        "I'd be happy to discuss that with you. What specific aspect are you most curious about?"
+      ]
+      return responses[Math.floor(Math.random() * responses.length)]
+    }
+  }
+
   const sendMessage = async () => {
     if (!inputMessage.trim() || loading) return
 
@@ -26,39 +53,18 @@ function App() {
     setInputMessage('')
     setLoading(true)
 
-    try {
-      const response = await fetch('http://localhost:8001/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: inputMessage })
-      })
-
-      const data = await response.json()
-      
-      if (data.success) {
-        const aiMessage: ChatMessage = {
-          id: (Date.now() + 1).toString(),
-          text: data.data.response,
-          sender: 'ai',
-          timestamp: new Date()
-        }
-        setMessages(prev => [...prev, aiMessage])
-      } else {
-        throw new Error(data.message)
-      }
-    } catch (error) {
-      const errorMessage: ChatMessage = {
+    // Simulate AI thinking (no API call needed)
+    setTimeout(() => {
+      const aiResponse = getAIResponse(inputMessage)
+      const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: 'Sorry, I encountered an error. Please try again.',
+        text: aiResponse,
         sender: 'ai',
         timestamp: new Date()
       }
-      setMessages(prev => [...prev, errorMessage])
-    } finally {
+      setMessages(prev => [...prev, aiMessage])
       setLoading(false)
-    }
+    }, 1000)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -74,7 +80,7 @@ function App() {
         {/* Header */}
         <header className="p-4 border-b border-gray-700">
           <h1 className="text-2xl font-bold text-center">SID AI Assistant 🚀</h1>
-          <p className="text-center text-gray-400">Powered by your local backend</p>
+          <p className="text-center text-gray-400">Live on Vercel - No backend needed</p>
         </header>
 
         {/* Messages */}
@@ -83,6 +89,7 @@ function App() {
             <div className="text-center text-gray-500 mt-8">
               <p className="text-lg">Welcome to SID AI Assistant!</p>
               <p className="text-sm">Start a conversation by typing a message below.</p>
+              <p className="text-xs mt-2">Try: "Hello", "What can you do?", or ask me anything!</p>
             </div>
           ) : (
             messages.map((message) => (
